@@ -19,8 +19,8 @@ http {
     access_log #{AGENTBOX-PATH}/var/nginx-access.log agentbox;
     error_log #{AGENTBOX-PATH}/var/nginx-error.log debug;
 
-    ssl_certificate     #{AGENTBOX-PATH}/deus/etc/renaissance_io.crt;
-    ssl_certificate_key #{AGENTBOX-PATH}/deus/etc/renaissance_io.key;
+    ssl_certificate     #{AGENTBOX-PATH}/chief/etc/renaissance_io.crt;
+    ssl_certificate_key #{AGENTBOX-PATH}/chief/etc/renaissance_io.key;
 
     large_client_header_buffers 4 32k;
 
@@ -53,7 +53,7 @@ http {
     server {
         listen          80;
         listen          443 ssl;
-        server_name     deus.#{root-domain};
+        server_name     chief.#{root-domain};
         location / {
             proxy_set_header Host $host;
             proxy_pass  http://127.0.0.1:2010/;
@@ -166,6 +166,6 @@ END)
                          (&p (&strong "This is X Machine."))
                          (&p "Running at " root-domain ".")))
            writeToFile:"#{AGENTBOX-PATH}/public/index.html" atomically:NO)
-          ;; deus redirect
-          ((&a href:(+ "http://deus." root-domain) "OK, Continue")
-           writeToFile:"#{AGENTBOX-PATH}/public/deus.html" atomically:NO))
+          ;; chief redirect
+          ((&a href:(+ "http://chief." root-domain) "OK, Continue")
+           writeToFile:"#{AGENTBOX-PATH}/public/chief.html" atomically:NO))
