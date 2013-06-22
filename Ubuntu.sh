@@ -72,6 +72,7 @@ git clone https://github.com/timburks/nu.git
 git clone https://github.com/timburks/RadHTTP.git
 git clone https://github.com/timburks/RadCrypto.git
 git clone https://github.com/timburks/RadMongoDB.git
+git clone https://github.com/timburks/RadJSON.git
 
 cd nu
 git checkout gnustep-libobjc2
@@ -93,6 +94,11 @@ nuke install
 cd ..
 
 cd RadMongoDB
+nuke
+nuke install
+cd ..
+
+cd RadJSON
 nuke
 nuke install
 cd ..
