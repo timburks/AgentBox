@@ -1,0 +1,6 @@
+(load "components/config")
+(load "components/database")
+
+(set DOMAIN "xbucket.net")
+
+(set-property "root-domain" DOMAIN)

@@ -1,0 +1,9 @@
+
+AgentBox
+
+A portable container for networked applications.
+
+On Linux (Ubuntu), AgentBox must be installed at /home/agentbox.
+This is performed automatically by the Ubuntu.sh setup script.
+
+
