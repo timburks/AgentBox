@@ -114,7 +114,6 @@ sudo rm -rf /home/agentbox
 sudo mv AgentBox /home/agentbox
 
 cd /home/agentbox
-sudo git checkout ubuntu
 sudo mkdir -p nginx/logs
 sudo mkdir -p var
 sudo mkdir -p workers
