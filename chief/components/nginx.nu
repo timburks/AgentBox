@@ -27,6 +27,7 @@ http {
     gzip on;
     gzip_proxied any;
 
+    types_hash_bucket_size 64;
     types {
         application/x-mpegURL                   m3u8;
         video/MP2T                              ts;
@@ -49,6 +50,7 @@ http {
     }
     default_type       text/html;
 
+    server_names_hash_bucket_size 64;
     server_names_hash_max_size 8192;
     server {
         listen          80;
