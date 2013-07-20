@@ -19,8 +19,8 @@ http {
     access_log #{AGENTBOX-PATH}/var/nginx-access.log agentbox;
     error_log #{AGENTBOX-PATH}/var/nginx-error.log debug;
 
-    ssl_certificate     #{AGENTBOX-PATH}/chief/etc/renaissance_io.crt;
-    ssl_certificate_key #{AGENTBOX-PATH}/chief/etc/renaissance_io.key;
+    ssl_certificate     #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.crt;
+    ssl_certificate_key #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.key;
 
     large_client_header_buffers 4 32k;
 
