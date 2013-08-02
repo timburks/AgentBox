@@ -24,6 +24,8 @@
 (load "components/pages")
 (load "components/signin")
 
-(files "/*path:" "../public")
+(files "/chief/*path:" "../public")
+
+(get "/chief/*whatever:" "Chief didn't have it. #{*whatever}")
 
 (RadHTTPServer run)

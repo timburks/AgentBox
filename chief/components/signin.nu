@@ -8,7 +8,7 @@
                       (&div class:"large-3 columns" (&p))
                       (&div class:"large-9 columns"
                             (&h2 message)
-                            (&form id:"email-form" method:"post" action:"/signin"
+                            (&form id:"email-form" method:"post" action:"/chief/signin"
                                    (&table (&tr (&td (&label for:"username" "Username "
                                                            style:"margin-right:2em"))
                                                 (&td (&input id:"username"
@@ -36,7 +36,7 @@
                       (&div class:"large-9 columns"
                             (&div class:"hero-unit"
                                   (&h2 message)
-                                  (&form id:"email-form" method:"post" action:"/adduser"
+                                  (&form id:"email-form" method:"post" action:"/chief/adduser"
                                          (&table (&tr (&td (&label for:"username" "Username "
                                                                  style:"margin-right:2em"))
                                                       (&td (&input id:"username"
@@ -64,10 +64,10 @@
 (function create-cookie (name)
           (dict name:name
                value:((RadUUID new) stringValue)
-          expiration:(NSDate dateWithTimeIntervalSinceNow:(* 24 3600))))
+          expiration:(NSDate dateWithTimeIntervalSinceNow:(* 24 3600 10))))
 
 (function display-cookie (cookie)
-          (+ (cookie name:) "=" (cookie value:) "; Path=\/; Expires=" ((cookie expiration:) rfc1123) ";"))
+          (+ "" (cookie name:) "=" (cookie value:) "; path=\/; expires=" ((cookie expiration:) rfc1123) ";"))
 
 (macro get-user (name)
        `(cond ((eq nil (set cookie ((REQUEST cookies) ,name))) nil)
@@ -77,14 +77,14 @@
 (macro require-account ()
        (unless (set account (get-user SITE)) (return nil)))
 
-(get "/signin"
+(get "/chief/signin"
      (REQUEST setContentType:"text/html")
      (set username "")
      (set password "")
      (set message "Please sign in.")
      (eval signin-form))
 
-(post "/signin"
+(post "/chief/signin"
       (REQUEST setContentType:"text/html")
       (set ip-address ((REQUEST headers) "X-Forwarded-For"))
       (set username ((REQUEST post) "username"))
@@ -97,34 +97,37 @@
                                                password:(password md5HashWithSalt:PASSWORD_SALT))
                             inCollection:(+ SITE ".users")))             
              (set session-cookie (create-cookie SITE))
+(puts "setting cookie: #{(display-cookie session-cookie)}")
              (RESPONSE setValue:(display-cookie session-cookie) forHTTPHeader:"Set-Cookie")             
              (set session (dict account_id:(account _id:) cookie:(session-cookie value:)))
+(puts "MATCH")
              (mongo updateObject:session
                     inCollection:(+ SITE ".sessions")
                    withCondition:(dict account_id:(account _id:))
                insertIfNecessary:YES
            updateMultipleEntries:NO)
-             (RESPONSE redirectResponseToLocation:"/"))
+             (RESPONSE redirectResponseToLocation:"/chief")
+)
             (else (set message "Password mismatch. Try that again.")
                   (eval signin-form))))
 
-(get "/signout"
+(get "/chief/signout"
      (if (set cookie ((REQUEST cookies) SITE))
          (mongo removeWithCondition:(dict cookie:cookie) fromCollection:(+ SITE ".sessions")))
-     (RESPONSE redirectResponseToLocation:"/"))
+     (RESPONSE redirectResponseToLocation:"/chief"))
 
-(get "/whoami"
+(get "/chief/whoami"
      (set account (get-user SITE))
      (REQUEST setContentType:"text/plain")
      (account description))
 
-(get "/adduser"
+(get "/chief/adduser"
      (set account (get-user SITE))
      (unless account (return nil))
      (set message "Add a user to AgentBox.")
      (eval adduser-form))
 
-(post "/adduser"
+(post "/chief/adduser"
       (set account (get-user SITE))
       (unless account (return nil))
       (set ip-address ((REQUEST headers) X-Forwarded-For:))
@@ -155,4 +158,4 @@
                     insertIfNecessary:YES
                 updateMultipleEntries:NO)
                   (puts "session saved")
-                  (RESPONSE redirectResponseToLocation:"/"))))
+                  (RESPONSE redirectResponseToLocation:"/chief"))))

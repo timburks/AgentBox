@@ -1,4 +1,4 @@
-(function HEAD (root-domain) <<-END
+(function NGINX-CONF (root-domain apps) <<-END
 #
 # AgentBox nginx configuration
 # this file was automatically generated
@@ -10,17 +10,9 @@ events {
 }
 
 http {
-    root #{AGENTBOX-PATH}/public;
-    error_page 404  /404.html;
-    error_page 403  /403.html;
-    error_page 502  /502.html;
-
     log_format agentbox '$msec|$time_local|$host|$request|$status|$bytes_sent|$request_time|$remote_addr|$http_referer|$http_user_agent|||';
     access_log #{AGENTBOX-PATH}/var/nginx-access.log agentbox;
     error_log #{AGENTBOX-PATH}/var/nginx-error.log debug;
-
-    ssl_certificate     #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.crt;
-    ssl_certificate_key #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.key;
 
     large_client_header_buffers 4 32k;
 
@@ -52,93 +44,55 @@ http {
 
     server_names_hash_bucket_size 64;
     server_names_hash_max_size 8192;
-    server {
-        listen          80;
-        listen          443 ssl;
-        server_name     chief.#{root-domain};
-        location / {
-            proxy_set_header Host $host;
-            proxy_pass  http://127.0.0.1:2010/;
-        }
-        client_max_body_size 10M;
-    }
 
     server {
         listen          80;
         listen          443 ssl;
-        server_name     api.#{root-domain};
-        location / {
-            proxy_set_header Host $host;
-            proxy_pass  http://127.0.0.1:2013/;
-        }
-        client_max_body_size 10M;
-    }
-END)
-
-(function MORE (root-domain) <<-END
-    server {
-        listen          80;
-        listen          443 default ssl;
-        server_name     #{root-domain};
-        root            #{AGENTBOX-PATH}/public;
-        index           index.html;
-        location / {
-            try_files $uri.html $uri $uri/ =404;
-        }
-    }
-
-END)
-
-(function nginx-service (app)
-          (if (app deployment:)
-              (then (set listen "listen 80;")
-                    (set range ((app domains:) rangeOfString:(get-property "root-domain")))
-                    (if (> (range 1) 0)
-                        (listen appendString:" listen 443 ssl;"))
-                    (set domains (app domains:))
-                    (set port ((((app deployment:) workers:) 0) port:))
-                    (set servers "")
-                    (((app deployment:) workers:) each:
-                     (do (worker)
-                         (servers appendString:(+ "        server 127.0.0.1:" (worker port:) ";\n"))))
-                    (set s <<-END
-    upstream #{(app _id:)} {
-#{servers}    }
-    server {
-        #{listen}
-        server_name     #{domains};
-        location / {
-            proxy_set_header Host $host;
-            proxy_pass  http://#{(app _id:)};
-            proxy_set_header X-Forwarded-For $remote_addr;
-        }
-    }
-END))
-              (else (set s "")))
-          s)
-
-(set TAIL <<-END
-
-    server {
-        listen          80;
+        ssl_certificate     #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.crt;
+        ssl_certificate_key #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.key;
         server_name     ~^(.*)$;
+        location /chief/ {
+            proxy_set_header Host $host;
+            proxy_pass  http://127.0.0.1:2010;
+        }
+#{(locations-for-apps apps)}
+        root #{AGENTBOX-PATH}/public;
         error_page 404  /404.html;
         error_page 403  /403.html;
         error_page 502  /502.html;
+        client_max_body_size 10M;
+        try_files $uri.html $uri $uri/ =404;
     }
-}       
+#{(upstream-servers-for-apps apps)}
+}
 END)
 
+(function locations-for-apps (apps)
+          ((apps map:
+                 (do (app)
+                     (+ "        # " (app name:) "\n"
+                        "        location /" (app path:) "/ {\n"
+                        "            proxy_set_header Host $host;\n"
+                        "            proxy_pass http://" (app _id:) ";\n"
+                        "            proxy_set_header X-Forwarded-For $remote_addr;\n"
+                        "        }")
+                     )) componentsJoinedByString:"\n"))
+
+(function upstream-servers-for-apps (apps)
+          ((apps map:
+                 (do (app)
+                     (+ "\n"
+                        "    # " (app name:) "\n"
+                        "    upstream " (app _id:) "{\n"
+                        ((((app deployment:) workers:) map:
+                          (do (worker)
+                              (+ "        server 127.0.0.1:" (worker port:) ";")))
+                         componentsJoinedByString:"\n")
+                        "\n    }")))
+           componentsJoinedByString:"\n"))
+
 (function nginx-config-with-services (root-domain apps)
-          (set config (+ (HEAD root-domain)
-                         ((apps map:
-                                (do (app)
-                                    (nginx-service app)))
-                          componentsJoinedByString:"\n")
-                         TAIL))
-          ;(puts "--------- nginx.config -- START ----------")
-          ;(puts config)
-          ;(puts "--------- nginx.config --- END ------------")
+          (set config (NGINX-CONF root-domain apps))
           config)
 
 (function nginx-conf-path ()

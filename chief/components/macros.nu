@@ -18,12 +18,12 @@
                              (&meta name:"viewport" content:"width=device-width, initial-scale=1.0")
                              (&meta name:"description" content:"AgentBox Monitor")
                              (&meta name:"author" content:"Tim Burks")
-                             (&script src:"/v2/js/custom.modernizr.js")
-                             (&link href:"/v2/css/normalize.css" rel:"stylesheet")
-                             (&link href:"/v2/css/foundation.min.css" rel:"stylesheet"))
+                             (&script src:"/chief/v2/js/custom.modernizr.js")
+                             (&link href:"/chief/v2/css/normalize.css" rel:"stylesheet")
+                             (&link href:"/chief/v2/css/foundation.min.css" rel:"stylesheet"))
                       (&body ,@*body
-                             (&script src:"/v2/js/jquery.js")
-                             (&script src:"/v2/js/foundation.min.js")
+                             (&script src:"/chief/v2/js/jquery.js")
+                             (&script src:"/chief/v2/js/foundation.min.js")
                              (&script "$(document).foundation();")))))
 
 (macro navbar (name)
@@ -35,31 +35,31 @@
               (&div class:""
                     (&nav class:"top-bar"
                           (&ul class:"title-area"
-                               (&li class:"name" (&h1 (&a href:"/" "AgentBox")))
+                               (&li class:"name" (&h1 (&a href:"/chief" "AgentBox")))
                                (&li class:"toggle-topbar menu-icon"
                                     (&a href:"#" (&span "Menu"))))
                           (&section class:"top-bar-section"
                                     (if (defined apps)
                                         (&ul class:"left"
                                              (&li class:"divider")
-                                             (&li (&a href:"/nginx.conf" "nginx"))
+                                             (&li (&a href:"/chief/nginx.conf" "nginx"))
                                              (&li class:"divider")
-                                             (&li (&a href:"/browse" "mongodb"))
+                                             (&li (&a href:"/chief/browse" "mongodb"))
                                              (&li class:"divider")
                                              (&li class:"has-dropdown" (&a href:"#" "apps")
                                                   (&ul class:"dropdown"
                                                        (apps map:
                                                              (do (app)
-                                                                 (&li (&a href:(+ "/apps/manage/" (app _id:))
+                                                                 (&li (&a href:(+ "/chief/apps/manage/" (app _id:))
                                                                           (app name:)))))
                                                        (&li class:"divider")
-                                                       (&li (&a href:"/apps/add" "Add an app"))))))
+                                                       (&li (&a href:"/chief/apps/add" "Add an app"))))))
                                     (&ul class:"right"
                                          (if (and (defined account) account)
                                              (then (&& (&li (&a href:"#"
                                                                 "signed in as " (account username:)))
-                                                       (&li (&a href:"/signout" " sign out"))
-                                                       (&li (&a href:"/adduser" " add user"))
-                                                       (&li (&a href:"/restart" " restart"))))
-                                             (else (&li href:"/signin" "sign in")))))))))
+                                                       (&li (&a href:"/chief/signout" " sign out"))
+                                                       (&li (&a href:"/chief/adduser" " add user"))
+                                                       (&li (&a href:"/chief/restart" " restart"))))
+                                             (else (&li href:"/chief/signin" "sign in")))))))))
 
