@@ -2,7 +2,7 @@
 
 (set whoami (NSString stringWithShellCommand:"whoami"))
 (unless (eq whoami "root")
-        (puts "chief must be run as root.")
+        (puts "control must be run as root.")
         (exit -1))
 
 ;; configuration
@@ -24,8 +24,8 @@
 (load "components/pages")
 (load "components/signin")
 
-(files "/chief/*path:" "../public")
+(files "/control/*path:" "../public")
 
-(get "/chief/*whatever:" "Chief didn't have it. #{*whatever}")
+(get "/control/*whatever:" "CONTROL didn't have it. #{*whatever}")
 
 (RadHTTPServer run)

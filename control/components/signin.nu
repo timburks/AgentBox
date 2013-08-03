@@ -8,7 +8,7 @@
                       (&div class:"large-3 columns" (&p))
                       (&div class:"large-9 columns"
                             (&h2 message)
-                            (&form id:"email-form" method:"post" action:"/chief/signin"
+                            (&form id:"email-form" method:"post" action:"/control/signin"
                                    (&table (&tr (&td (&label for:"username" "Username "
                                                            style:"margin-right:2em"))
                                                 (&td (&input id:"username"
@@ -36,7 +36,7 @@
                       (&div class:"large-9 columns"
                             (&div class:"hero-unit"
                                   (&h2 message)
-                                  (&form id:"email-form" method:"post" action:"/chief/adduser"
+                                  (&form id:"email-form" method:"post" action:"/control/adduser"
                                          (&table (&tr (&td (&label for:"username" "Username "
                                                                  style:"margin-right:2em"))
                                                       (&td (&input id:"username"
@@ -77,14 +77,14 @@
 (macro require-account ()
        (unless (set account (get-user SITE)) (return nil)))
 
-(get "/chief/signin"
+(get "/control/signin"
      (REQUEST setContentType:"text/html")
      (set username "")
      (set password "")
      (set message "Please sign in.")
      (eval signin-form))
 
-(post "/chief/signin"
+(post "/control/signin"
       (REQUEST setContentType:"text/html")
       (set ip-address ((REQUEST headers) "X-Forwarded-For"))
       (set username ((REQUEST post) "username"))
@@ -106,28 +106,28 @@
                    withCondition:(dict account_id:(account _id:))
                insertIfNecessary:YES
            updateMultipleEntries:NO)
-             (RESPONSE redirectResponseToLocation:"/chief")
+             (RESPONSE redirectResponseToLocation:"/control")
 )
             (else (set message "Password mismatch. Try that again.")
                   (eval signin-form))))
 
-(get "/chief/signout"
+(get "/control/signout"
      (if (set cookie ((REQUEST cookies) SITE))
          (mongo removeWithCondition:(dict cookie:cookie) fromCollection:(+ SITE ".sessions")))
-     (RESPONSE redirectResponseToLocation:"/chief"))
+     (RESPONSE redirectResponseToLocation:"/control"))
 
-(get "/chief/whoami"
+(get "/control/whoami"
      (set account (get-user SITE))
      (REQUEST setContentType:"text/plain")
      (account description))
 
-(get "/chief/adduser"
+(get "/control/adduser"
      (set account (get-user SITE))
      (unless account (return nil))
      (set message "Add a user to AgentBox.")
      (eval adduser-form))
 
-(post "/chief/adduser"
+(post "/control/adduser"
       (set account (get-user SITE))
       (unless account (return nil))
       (set ip-address ((REQUEST headers) X-Forwarded-For:))
@@ -158,4 +158,4 @@
                     insertIfNecessary:YES
                 updateMultipleEntries:NO)
                   (puts "session saved")
-                  (RESPONSE redirectResponseToLocation:"/chief"))))
+                  (RESPONSE redirectResponseToLocation:"/control"))))

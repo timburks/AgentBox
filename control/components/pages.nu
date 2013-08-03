@@ -8,7 +8,7 @@
 
 (macro require-user ()
        `(unless (set account (get-user SITE))
-                (return (RESPONSE redirectResponseToLocation:"/chief/signin"))))
+                (return (RESPONSE redirectResponseToLocation:"/control/signin"))))
 
 (macro require-authorization ()
        `(progn (set authorization ((REQUEST headers) Authorization:))
@@ -25,7 +25,7 @@
 
 (get "/" "AgentBox")
 
-(get "/chief"
+(get "/control"
      (require-user)
      (set apps (mongo findArray:(dict $query:(dict owner_id:(account _id:))
                                     $orderby:(dict name:1))
@@ -43,14 +43,14 @@
                                (&h1 "This is AgentBox.")                               
                                )))))
 
-(get "/chief/apps/add"
+(get "/control/apps/add"
      (require-user)
      (htmlpage "Add an app"
                (&& (navbar "Add")
                    (&div class:"row"
                          (&div class:"large-12 columns"
                                (&h1 "Add an app")
-                               (&form action:"/chief/apps/add/"
+                               (&form action:"/control/apps/add/"
                                           id:"edit" method:"post"
                                       (&dl (&dt (&label for:"app_name" "App name"))
                                            (&dd (&input id:"app_name" name:"name" size:"40" type:"text"))
@@ -67,9 +67,9 @@
                                                          rows:"5" cols:"60")))
                                       (&input name:"save" type:"submit" value:"Save")
                                       " or "
-                                      (&a href:"/chief" "Cancel")))))))
+                                      (&a href:"/control" "Cancel")))))))
 
-(post "/chief/apps/add"
+(post "/control/apps/add"
       (require-user)
       (set app (dict name:((REQUEST post) name:)
                   domains:((REQUEST post) domains:)
@@ -77,9 +77,9 @@
                   workers:(((REQUEST post) workers:) intValue)
                  owner_id:(account _id:)))
       (set appid (add-app app))
-      (RESPONSE redirectResponseToLocation:(+ "/chief/apps/manage/" appid)))
+      (RESPONSE redirectResponseToLocation:(+ "/control/apps/manage/" appid)))
 
-(get "/chief/apps/manage/appid:"
+(get "/control/apps/manage/appid:"
      (require-user)
      (set appid ((REQUEST bindings) appid:))
      (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
@@ -109,14 +109,14 @@
                                                                   (rss-date-formatter stringFromDate:(version created_at:))
                                                                   (&br)
                                                                   (version version:))
-                                                             (&td (&a href:(+ "/chief/apps/manage/delete/" appid "/" (version version:))
+                                                             (&td (&a href:(+ "/control/apps/manage/delete/" appid "/" (version version:))
                                                                       "Delete"))
-                                                             (&td (&a href:(+ "/chief/apps/manage/deploy/" appid "/" (version version:))
+                                                             (&td (&a href:(+ "/control/apps/manage/deploy/" appid "/" (version version:))
                                                                       "Deploy")))))))
                                      (else (&p "No versions have been uploaded.")))
                                  (if (app deployment:)
                                      (+
-                                       (&span style:"float:right" (&a href:(+ "/chief/apps/manage/stop/" (app _id:)) "Stop"))
+                                       (&span style:"float:right" (&a href:(+ "/control/apps/manage/stop/" (app _id:)) "Stop"))
                                        (&h3 "Deployment")
                                        (&table class:"table table-bordered"
                                                (&tr (&td "name") (&td ((app deployment:) name:)))
@@ -125,28 +125,28 @@
                                                 (do (worker)
                                                     (+ (&tr (&td (&strong "worker"))
                                                             (&td (worker host:) ":" (worker port:)))
-                                                       (&tr (&td) (&td (&a href:(+ "/chief/apps/manage/" appid "/" (worker container:))
+                                                       (&tr (&td) (&td (&a href:(+ "/control/apps/manage/" appid "/" (worker container:))
                                                                            (worker container:))))))))))
-                                 (&form action:(+ "/chief/apps/upload/" appid)
+                                 (&form action:(+ "/control/apps/upload/" appid)
                                         method:"post"
                                        enctype:"multipart/form-data"
                                         (&p "To upload a new version of this app:")
                                         (&input type:"file" name:"appfile" size:40)
                                         (&input type:"submit" name:"upload" value:"upload"))
                                  (&hr style:"margin-top:2em;")
-                                 (&a href:(+ "/chief/apps/edit/" appid) "Edit this app")
+                                 (&a href:(+ "/control/apps/edit/" appid) "Edit this app")
                                  " | "
-                                 (&a href:(+ "/chief/apps/delete/" appid) "Delete this app"))))))
+                                 (&a href:(+ "/control/apps/delete/" appid) "Delete this app"))))))
 
-(get "/chief/apps/manage/stop/appid:"
+(get "/control/apps/manage/stop/appid:"
      (require-user)
      (set appid ((REQUEST bindings) appid:))
      (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
      (unless app (return nil))
      (halt-app-deployment app)
-     (RESPONSE redirectResponseToLocation:(+ "/chief/apps/manage/" appid)))
+     (RESPONSE redirectResponseToLocation:(+ "/control/apps/manage/" appid)))
 
-(get "/chief/apps/manage/delete/appid:/version:"
+(get "/control/apps/manage/delete/appid:/version:"
      (require-user)
      (set appid ((REQUEST bindings) appid:))
      (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
@@ -164,18 +164,18 @@
      (mongo removeFile:version
           inCollection:"appfiles"
             inDatabase:SITE)
-     (RESPONSE redirectResponseToLocation:(+ "/chief/apps/manage/" appid)))
+     (RESPONSE redirectResponseToLocation:(+ "/control/apps/manage/" appid)))
 
-(get "/chief/apps/manage/deploy/appid:/version:"
+(get "/control/apps/manage/deploy/appid:/version:"
      (require-user)
      (set appid ((REQUEST bindings) appid:))
      (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
      (unless app (return nil))
      (set version ((REQUEST bindings) version:))
      (deploy-version app version)
-     (RESPONSE redirectResponseToLocation:(+ "/chief/apps/manage/" appid)))
+     (RESPONSE redirectResponseToLocation:(+ "/control/apps/manage/" appid)))
 
-(post "/chief/apps/upload/appid:"
+(post "/control/apps/upload/appid:"
       (require-user)
       (set appid ((REQUEST bindings) appid:))
       (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
@@ -190,9 +190,9 @@
           (then ;; save appfile
                 (puts "saving")
                 (add-version app appfile-name appfile-data)))
-      (RESPONSE redirectResponseToLocation:(+ "/chief/apps/manage/" appid)))
+      (RESPONSE redirectResponseToLocation:(+ "/control/apps/manage/" appid)))
 
-(post "/chief/api/appname:"
+(post "/control/api/appname:"
       (require-authorization)
       (set app (mongo findOne:(dict name:appname) inCollection:(+ SITE ".apps")))
       (unless app (return "error: app #{appname} not found"))
@@ -206,7 +206,7 @@
                 (version version:))
           (else "error: invalid app data")))
 
-(post "/chief/api/appname:/deploy/version:"
+(post "/control/api/appname:/deploy/version:"
       (require-authorization)
       (set app (mongo findOne:(dict name:appname) inCollection:(+ SITE ".apps")))
       (unless app (return "can't find app"))
@@ -215,7 +215,7 @@
           (then "deployed")
           (else "error: unable to deploy app")))
 
-(get "/chief/apps/edit/appid:"
+(get "/control/apps/edit/appid:"
      (require-user)
      (set appid ((REQUEST bindings) appid:))
      (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
@@ -225,7 +225,7 @@
                      (&div class:"row"
                            (&div class:"large-12 columns"
                                  (&h1 "Editing " (app name:))
-                                 (&form action:(+ "/chief/apps/edit/" appid)
+                                 (&form action:(+ "/control/apps/edit/" appid)
                                             id:"edit" method:"post"
                                         (&dl (&dt (&label for:"app_name" "App name"))
                                              (&dd (&input id:"app_name" name:"name" size:"40" type:"text" value:(app name:)))
@@ -242,9 +242,9 @@
                                                             rows:"5" cols:"60" (app description:))))
                                         (&input name:"save" type:"submit" value:"Save")
                                         " or "
-                                        (&a href:"/chief" "Cancel")))))))
+                                        (&a href:"/control" "Cancel")))))))
 
-(post "/chief/apps/edit/appid:"
+(post "/control/apps/edit/appid:"
       (require-user)
       (set appid ((REQUEST bindings) appid:))
       (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
@@ -260,9 +260,9 @@
             withCondition:(dict _id:(oid appid))
         insertIfNecessary:NO
     updateMultipleEntries:NO)
-      (RESPONSE redirectResponseToLocation:(+ "/chief/apps/manage/" appid)))
+      (RESPONSE redirectResponseToLocation:(+ "/control/apps/manage/" appid)))
 
-(get "/chief/apps/delete/appid:"
+(get "/control/apps/delete/appid:"
      (require-user)
      (set appid ((REQUEST bindings) appid:))
      (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
@@ -276,13 +276,13 @@
                                          (&tr (&td "domains" (&td (app domains:))))
                                          (&tr (&td "description" (&td (app description:)))))
                                  (&h2 "WARNING: there is no undo.")
-                                 (&form action:(+ "/chief/apps/delete/" appid)
+                                 (&form action:(+ "/control/apps/delete/" appid)
                                         method:"POST"
                                         (&input type:"submit" name:"submit" value:"OK")
                                         "&nbsp;"
                                         (&input type:"submit" name:"submit" value:"Cancel")))))))
 
-(post "/chief/apps/delete/appid:"
+(post "/control/apps/delete/appid:"
       (require-user)
       (set appid ((REQUEST bindings) appid:))
       (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
@@ -302,9 +302,9 @@
                                 (&div class:"row"
                                       (&div class:"large-12 columns"
                                             (&h2 "It's gone.")))))))
-      (else (RESPONSE redirectResponseToLocation:(+ "/chief/apps/manage/" appid))))
+      (else (RESPONSE redirectResponseToLocation:(+ "/control/apps/manage/" appid))))
 
-(get "/chief/apps/manage/appid:/container:"
+(get "/control/apps/manage/appid:/container:"
      (require-user)
      (set appid ((REQUEST bindings) appid:))
      (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
@@ -317,17 +317,17 @@
                          (&div (navbar "worker detail")
                                (&div class:"row"
                                      (&div class:"large-12 columns"
-                                           (&h1 "Worker for " (&a href:(+ "/chief/apps/manage/" appid) (app name:)))
+                                           (&h1 "Worker for " (&a href:(+ "/control/apps/manage/" appid) (app name:)))
                                            (&pre (worker description))
                                            (&ul (if (eq (uname) "Linux")
-                                                    (then (&li (&a href:(+ "/chief/apps/manage/" appid "/" container "/upstart.conf") "upstart.conf")))
-                                                    (else (+ (&li (&a href:(+ "/chief/apps/manage/" appid "/" container "/launchd.plist") "launchd.plist"))
-                                                             (&li (&a href:(+ "/chief/apps/manage/" appid "/" container "/sandbox.sb") "sandbox.sb")))))
-                                                (&li (&a href:(+ "/chief/apps/manage/" appid "/" container "/stdout.log") "stdout.log"))
-                                                (&li (&a href:(+ "/chief/apps/manage/" appid "/" container "/stderr.log") "stderr.log"))))))))
+                                                    (then (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/upstart.conf") "upstart.conf")))
+                                                    (else (+ (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/launchd.plist") "launchd.plist"))
+                                                             (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/sandbox.sb") "sandbox.sb")))))
+                                                (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/stdout.log") "stdout.log"))
+                                                (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/stderr.log") "stderr.log"))))))))
          (else "not found")))
 
-(get "/chief/apps/manage/appid:/container:/file:"
+(get "/control/apps/manage/appid:/container:/file:"
      (require-user)
      (set appid ((REQUEST bindings) appid:))
      (set app (mongo findOne:(dict _id:(oid appid) owner_id:(account _id:)) inCollection:(+ SITE ".apps")))
@@ -357,7 +357,7 @@
                                            (&pre class:"code" (html-escape text)))))))
          (else nil)))
 
-(get "/chief/about"
+(get "/control/about"
      (require-user)
      (htmlpage "About AgentBox"
                (&div (navbar "About")
@@ -378,7 +378,7 @@
                                  (&p "Copyright ©2012, All rights reserved.")
                                  (&p (&a href:"mailto:tim@radtastical.com" "Contact us.")))))))
 
-(get "/chief/browse"
+(get "/control/browse"
      (require-user)
      (set collections ((mongo collectionNamesInDatabase:SITE) sort))
      (htmlpage "Browse Data Store"
@@ -390,9 +390,9 @@
                                          (collections mapWithIndex:
                                                       (do (collection index)
                                                           (&tr (&td (+ index 1) ". "
-                                                                    (&a href:(+ "/chief/browse/" collection) collection)))))))))))
+                                                                    (&a href:(+ "/control/browse/" collection) collection)))))))))))
 
-(get "/chief/browse/collection:"
+(get "/control/browse/collection:"
      (require-user)
      (set collection ((REQUEST bindings) collection:))
      (set documents (mongo findArray:nil inCollection:(+ SITE "." collection)))
@@ -406,24 +406,24 @@
                                                 (&div (&h4 (document _id:))
                                                       (&pre (document description))))))))))
 
-(get "/chief/nginx.conf"
+(get "/control/nginx.conf"
      (require-user)
      (REQUEST setContentType:"text/html")
      (htmlpage "AgentBox nginx.conf"
                (&div (navbar "nginx.conf")
                      (&div class:"row"
                            (&div class:"large-12 columns"
-                                 (&h1 "AgentBox nginx.conf " (&a href:"/chief/restart-nginx" "(restart)"))
+                                 (&h1 "AgentBox nginx.conf " (&a href:"/control/restart-nginx" "(restart)"))
                                  (&pre class:"code" (NSString stringWithContentsOfFile:(nginx-conf-path))))))))
 
-(get "/chief/restart-nginx"
+(get "/control/restart-nginx"
      (require-user)
      (restart-nginx)
-     (RESPONSE redirectResponseToLocation:"/chief"))
+     (RESPONSE redirectResponseToLocation:"/control"))
 
 ;;; site management
 
-(get "/chief/restart"
+(get "/control/restart"
      (require-user)
      (RESPONSE setExit:1)
      (RESPONSE redirectResponseToLocation:"/restart.html"))

@@ -124,12 +124,12 @@ sudo mkdir -p nginx/logs
 sudo mkdir -p var
 sudo mkdir -p workers
 
-cd /home/agentbox/chief
+cd /home/agentbox/control
 sudo nush tools/setup.nu
 sudo /usr/sbin/nginx 
 cd ..
 
-sudo cp upstart/agentbox-chief.conf /etc/init
+sudo cp upstart/agentbox-control.conf /etc/init
 sudo chown -R agentbox /home/agentbox
-sudo initctl start agentbox-chief
+sudo initctl start agentbox-control
 

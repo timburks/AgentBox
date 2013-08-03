@@ -48,12 +48,12 @@ http {
     server {
         listen          80;
         listen          443 ssl;
-        ssl_certificate     #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.crt;
-        ssl_certificate_key #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.key;
+        ssl_certificate     #{AGENTBOX-PATH}/control/etc/wildcard_agent_io.crt;
+        ssl_certificate_key #{AGENTBOX-PATH}/control/etc/wildcard_agent_io.key;
         server_name     ~^(.*)$;
         root #{AGENTBOX-PATH}/public;
         try_files $uri.html $uri $uri/ =404;
-        location /chief/ {
+        location /control/ {
             proxy_set_header Host $host;
             proxy_pass  http://127.0.0.1:2010;
         }
@@ -121,6 +121,6 @@ END)
                   (&body style:"background-color:#000; color:#FFF; font-family:Helvetica;"
                          (&p (&strong "AgentBox"))))
            writeToFile:"#{AGENTBOX-PATH}/public/index.html" atomically:NO)
-          ;; chief redirect
-          ((&a href:(+ "/chief") "OK, Continue")
+          ;; control redirect
+          ((&a href:(+ "/control") "OK, Continue")
            writeToFile:"#{AGENTBOX-PATH}/public/restart.html" atomically:NO))
