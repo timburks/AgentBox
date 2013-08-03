@@ -109,27 +109,27 @@ sudo apt-get install nginx -y
 sudo apt-get install mongodb -y
 sudo apt-get install unzip -y
 
-sudo adduser --system -disabled-login agentbox 
-sudo addgroup agentbox
+sudo adduser --system -disabled-login control 
+sudo addgroup control
 
-# replace /home/agentbox with the AgentBox repository
+# replace /home/control with the AgentBox repository
 # to expose the AgentBox git repo, run this on xmachine.net:
 # % sudo -u git git daemon --base-path=/Users/git/repositories
 git clone git://xmachine.net/AgentBox.git
-sudo rm -rf /home/agentbox
-sudo mv AgentBox /home/agentbox
+sudo rm -rf /home/control
+sudo mv AgentBox /home/control
 
-cd /home/agentbox
+cd /home/control
 sudo mkdir -p nginx/logs
 sudo mkdir -p var
 sudo mkdir -p workers
 
-cd /home/agentbox/control
+cd /home/control/control
 sudo nush tools/setup.nu
 sudo /usr/sbin/nginx 
 cd ..
 
-sudo cp upstart/agentbox-control.conf /etc/init
-sudo chown -R agentbox /home/agentbox
-sudo initctl start agentbox-control
+sudo cp upstart/agentio-control.conf /etc/init
+sudo chown -R control /home/control
+sudo initctl start agentio-control
 

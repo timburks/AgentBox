@@ -1,19 +1,7 @@
 #!/usr/local/bin/nush
-(load "RadKit")
-
-(get "/"
-     (RESPONSE setValue:"text/html" forHTTPHeader:"Content-Type")
-     (&html (&head)
-            (&body style:"background-color:#008; color:#FFF; font-family:Helvetica;"
-                   (&h1 "Sample")
-                   (&p "This is a sample X Machine app."))))
-
-(files "/*path:" "public")
+(load "RadHTTP:macros")
 
 (get "/*anything:"
-     (RESPONSE setStatus:404)
-     (&html (&body (&h1 "Not Found")
-                   (&h3 "/" *anything)
-                   (&p "Resource not found"))))
+     (+ "second: " *anything))
 
 (RadHTTPServer run)

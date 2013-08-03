@@ -2,7 +2,7 @@
 
 (set whoami (NSString stringWithShellCommand:"whoami"))
 (unless (eq whoami "root")
-        (puts "control must be run as root.")
+        (puts "controld must be run as root.")
         (exit -1))
 
 ;; configuration
