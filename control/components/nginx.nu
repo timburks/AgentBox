@@ -114,13 +114,10 @@ END)
 
 (function prime-nginx ()
           (set root-domain (get-property "root-domain"))
-          ((NSFileManager defaultManager) removeItemAtPath:(nginx-conf-path) error:nil)
-          ((nginx-config-with-services root-domain (array)) writeToFile:(nginx-conf-path) atomically:YES)
-          ;; site index
-          ((&html (&head (&title "AgentBox"))
-                  (&body style:"background-color:#000; color:#FFF; font-family:Helvetica;"
-                         (&p (&strong "AgentBox"))))
-           writeToFile:"#{CONTROL-PATH}/public/index.html" atomically:NO)
+          ((NSFileManager defaultManager) 
+           removeItemAtPath:(nginx-conf-path) error:nil)
+          ((nginx-config-with-services root-domain (array)) 
+           writeToFile:(nginx-conf-path) atomically:YES)
           ;; control redirect
           ((&a href:(+ "/control") "OK, Continue")
            writeToFile:"#{CONTROL-PATH}/public/restart.html" atomically:NO))
