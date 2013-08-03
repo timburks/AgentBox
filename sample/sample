@@ -1,7 +1,0 @@
-#!/usr/local/bin/nush
-(load "RadHTTP:macros")
-
-(get "/*anything:"
-     (+ "sample: " *anything))
-
-(RadHTTPServer run)
