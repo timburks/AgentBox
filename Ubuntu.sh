@@ -103,7 +103,7 @@ nuke
 nuke install
 cd ..
 
-#### XMACHINE INSTALLATION FOLLOWS
+#### AGENT I/O INSTALLATION FOLLOWS
 
 sudo apt-get install nginx -y
 sudo apt-get install mongodb -y

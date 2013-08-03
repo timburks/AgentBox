@@ -2,6 +2,6 @@
 (load "RadHTTP:macros")
 
 (get "/*anything:"
-     (+ "second: " *anything))
+     (+ "sample: " *anything))
 
 (RadHTTPServer run)
