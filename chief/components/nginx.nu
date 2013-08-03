@@ -51,17 +51,17 @@ http {
         ssl_certificate     #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.crt;
         ssl_certificate_key #{AGENTBOX-PATH}/chief/etc/wildcard_agent_io.key;
         server_name     ~^(.*)$;
+        root #{AGENTBOX-PATH}/public;
+        try_files $uri.html $uri $uri/ =404;
         location /chief/ {
             proxy_set_header Host $host;
             proxy_pass  http://127.0.0.1:2010;
         }
 #{(locations-for-apps apps)}
-        root #{AGENTBOX-PATH}/public;
         error_page 404  /404.html;
         error_page 403  /403.html;
         error_page 502  /502.html;
         client_max_body_size 10M;
-        try_files $uri.html $uri $uri/ =404;
     }
 #{(upstream-servers-for-apps apps)}
 }
@@ -117,11 +117,10 @@ END)
           ((NSFileManager defaultManager) removeItemAtPath:(nginx-conf-path) error:nil)
           ((nginx-config-with-services root-domain (array)) writeToFile:(nginx-conf-path) atomically:YES)
           ;; site index
-          ((&html (&head (&title "X Machine"))
+          ((&html (&head (&title "AgentBox"))
                   (&body style:"background-color:#000; color:#FFF; font-family:Helvetica;"
-                         (&p (&strong "This is X Machine."))
-                         (&p "Running at " root-domain ".")))
+                         (&p (&strong "AgentBox"))))
            writeToFile:"#{AGENTBOX-PATH}/public/index.html" atomically:NO)
           ;; chief redirect
-          ((&a href:(+ "http://chief." root-domain) "OK, Continue")
-           writeToFile:"#{AGENTBOX-PATH}/public/chief.html" atomically:NO))
+          ((&a href:(+ "/chief") "OK, Continue")
+           writeToFile:"#{AGENTBOX-PATH}/public/restart.html" atomically:NO))

@@ -23,10 +23,9 @@
                               inCollection:(+ SITE ".users")))
                (unless account (return "unauthorized"))))
 
+(get "/" "AgentBox")
 
 (get "/chief"
-(puts "get /chief")
-(puts ((REQUEST cookies) description))
      (require-user)
      (set apps (mongo findArray:(dict $query:(dict owner_id:(account _id:))
                                     $orderby:(dict name:1))
@@ -55,6 +54,8 @@
                                           id:"edit" method:"post"
                                       (&dl (&dt (&label for:"app_name" "App name"))
                                            (&dd (&input id:"app_name" name:"name" size:"40" type:"text"))
+                                           (&dt (&label for:"app_path" "App path"))
+                                           (&dd (&input id:"app_path" name:"path" size:"40" type:"text"))
                                            (&dt (&label for:"app_domains" "App domains"))
                                            (&dd (&input id:"app_domains" name:"domains" size:"40" type:"text"))
                                            (&dt (&label for:"app_workers" "App workers"))
@@ -425,5 +426,5 @@
 (get "/chief/restart"
      (require-user)
      (RESPONSE setExit:1)
-     (RESPONSE redirectResponseToLocation:"/chief.html"))
+     (RESPONSE redirectResponseToLocation:"/restart.html"))
 
