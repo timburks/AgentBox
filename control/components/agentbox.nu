@@ -114,7 +114,7 @@
                          (set port (get-next-available-port busy-ports port))
                          
                          (if (eq (uname) "Linux")
-                             (then (set upstart-config (generate-upstart-config container app-name port))
+                             (then (set upstart-config (generate-upstart-config container app-name port app))
                                    (upstart-config writeToFile:(+ "/etc/init/agentio-worker-" port ".conf") atomically:NO)
                                    (system (+ "/sbin/initctl start agentio-worker-" port)))
                              (else (set sandbox-sb (generate-sandbox-description container app-name port))

@@ -44,6 +44,7 @@ http {
 
     server_names_hash_bucket_size 64;
     server_names_hash_max_size 8192;
+#{(upstream-servers-for-apps apps)}
 
     server {
         listen          80;
@@ -63,20 +64,45 @@ http {
         error_page 502  /502.html;
         client_max_body_size 10M;
     }
-#{(upstream-servers-for-apps apps)}
+#{(servers-for-apps apps)}
 }
 END)
 
+(function servers-for-apps (apps)
+          (set RESULTS "")
+          (apps each:
+                (do (app)
+                    (if (and (app domains:) ((app domains:) length))
+                        (then (set server-name (app domains:))
+                              (RESULTS << <<-END
+
+    server {
+        listen          80;
+        server_name     #{server-name};
+        root #{CONTROL-PATH}/public;
+        try_files $uri.html $uri $uri/ =404;
+        location / {
+            proxy_set_header Host $host;
+            proxy_pass http://#{(app _id:)};
+            proxy_set_header X-Forwarded-For $remote_addr;
+        }
+    }
+END)))))
+          RESULTS)
+
 (function locations-for-apps (apps)
-          ((apps map:
-                 (do (app)
-                     (+ "        # " (app name:) "\n"
-                        "        location /" (app path:) "/ {\n"
-                        "            proxy_set_header Host $host;\n"
-                        "            proxy_pass http://" (app _id:) ";\n"
-                        "            proxy_set_header X-Forwarded-For $remote_addr;\n"
-                        "        }")
-                     )) componentsJoinedByString:"\n"))
+          (set RESULTS "")
+          (apps each:
+                (do (app)
+                    (if (and (app path:) ((app path:) length))
+                        (then (RESULTS << (+ "        # " (app name:) "\n"
+                                             "        location /" (app path:) "/ {\n"
+                                             "            proxy_set_header Host $host;\n"
+                                             "            proxy_pass http://" (app _id:) ";\n"
+                                             "            proxy_set_header X-Forwarded-For $remote_addr;\n"
+                                             "        }"))))))
+          RESULTS)
+
 
 (function upstream-servers-for-apps (apps)
           ((apps map:
@@ -114,9 +140,9 @@ END)
 
 (function prime-nginx ()
           (set root-domain (get-property "root-domain"))
-          ((NSFileManager defaultManager) 
+          ((NSFileManager defaultManager)
            removeItemAtPath:(nginx-conf-path) error:nil)
-          ((nginx-config-with-services root-domain (array)) 
+          ((nginx-config-with-services root-domain (array))
            writeToFile:(nginx-conf-path) atomically:YES)
           ;; control redirect
           ((&a href:(+ "/control") "OK, Continue")

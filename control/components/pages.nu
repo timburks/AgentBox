@@ -57,16 +57,16 @@
                               (row map:
                                    (do (app)
                                        (&div class:"large-4 columns end"
-					  (&div class:"panel" style:"margin:5px"
-                                             (progn 
-                                                (if (and (app path:) ((app path:) length))
-                                                 (then (set link (+ "/" (app path:))))
-                                                 (else (set link nil)))
-                                             (&div
-                                                  (&h2 (&a href:link (app name:)))
-                                                  (&p (app description:))
-                                                  (&p (&a href:(+ "/control/apps/manage/" (app _id:)) "Manage it."))
-                                             ))))))
+                                             (&div class:"panel" style:"margin:5px"
+                                                   (progn
+                                                         (if (and (app path:) ((app path:) length))
+                                                             (then (set link (+ "/" (app path:))))
+                                                             (else (set link (+ "http://" (((app domains:) componentsSeparatedByString:" ") 0)))))
+                                                         (&div
+                                                              (&h2 (&a href:link (app name:)))
+                                                              (&p (app description:))
+                                                              (&p (&a href:(+ "/control/apps/manage/" (app _id:)) "Manage it."))
+                                                              ))))))
                               )))
                    )))
 
