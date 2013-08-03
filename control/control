@@ -24,7 +24,7 @@
 (load "components/pages")
 (load "components/signin")
 
-(files "/control/*path:" "../public")
+(files "/control/*path:" "public")
 
 (get "/control/*whatever:" "CONTROL didn't have it. #{*whatever}")
 

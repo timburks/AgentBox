@@ -16,14 +16,14 @@
                (&html (&head (&meta charset:"utf-8")
                              (&title ,title)
                              (&meta name:"viewport" content:"width=device-width, initial-scale=1.0")
-                             (&meta name:"description" content:"AgentBox Monitor")
+                             (&meta name:"description" content:"CONTROL")
                              (&meta name:"author" content:"Tim Burks")
-                             (&script src:"/control/v2/js/custom.modernizr.js")
-                             (&link href:"/control/v2/css/normalize.css" rel:"stylesheet")
-                             (&link href:"/control/v2/css/foundation.min.css" rel:"stylesheet"))
+                             (&script src:"/foundation/js/custom.modernizr.js")
+                             (&link href:"/foundation/css/normalize.css" rel:"stylesheet")
+                             (&link href:"/foundation/css/foundation.min.css" rel:"stylesheet"))
                       (&body ,@*body
-                             (&script src:"/control/v2/js/jquery.js")
-                             (&script src:"/control/v2/js/foundation.min.js")
+                             (&script src:"/foundation/js/jquery.js")
+                             (&script src:"/foundation/js/foundation.min.js")
                              (&script "$(document).foundation();")))))
 
 (macro navbar (name)
@@ -35,7 +35,7 @@
               (&div class:""
                     (&nav class:"top-bar"
                           (&ul class:"title-area"
-                               (&li class:"name" (&h1 (&a href:"/control" "AgentBox")))
+                               (&li class:"name" (&h1 (&a href:"/control" "CONTROL")))
                                (&li class:"toggle-topbar menu-icon"
                                     (&a href:"#" (&span "Menu"))))
                           (&section class:"top-bar-section"

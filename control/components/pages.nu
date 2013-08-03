@@ -1,5 +1,18 @@
 ;; pages
 
+(class NSArray
+ (- subarraysOfN:n is
+    (set a (array))
+    (set current (array))
+    (self each:
+          (do (item)
+              (if (eq (current count) 0)
+                  (a << current))
+              (current << item)
+              (if (eq (current count) n)
+                  (set current (array)))))
+    a))
+
 (function html-escape (s)
           ((((s stringByReplacingOccurrencesOfString:"&" withString:"&amp;")
              stringByReplacingOccurrencesOfString:"<" withString:"&lt;")
@@ -23,8 +36,6 @@
                               inCollection:(+ SITE ".users")))
                (unless account (return "unauthorized"))))
 
-(get "/" "AgentBox")
-
 (get "/control"
      (require-user)
      (set apps (mongo findArray:(dict $query:(dict owner_id:(account _id:))
@@ -39,9 +50,25 @@
                    (&div class:"row"
                          (&div class:"large-12 columns"
                                (&p "Monitoring " (apps count) " apps. "
-                                   "Running " worker-count " instances.")
-                               (&h1 "This is AgentBox.")                               
-                               )))))
+                                   "Running " worker-count " instances.")))
+                   ((apps subarraysOfN:3) map:
+                    (do (row)
+                        (&div class:"row"
+                              (row map:
+                                   (do (app)
+                                       (&div class:"large-4 columns end"
+					  (&div class:"panel" style:"margin:5px"
+                                             (progn 
+                                                (if (and (app path:) ((app path:) length))
+                                                 (then (set link (+ "/" (app path:))))
+                                                 (else (set link nil)))
+                                             (&div
+                                                  (&h2 (&a href:link (app name:)))
+                                                  (&p (app description:))
+                                                  (&p (&a href:(+ "/control/apps/manage/" (app _id:)) "Manage it."))
+                                             ))))))
+                              )))
+                   )))
 
 (get "/control/apps/add"
      (require-user)
@@ -72,6 +99,7 @@
 (post "/control/apps/add"
       (require-user)
       (set app (dict name:((REQUEST post) name:)
+                     path:((REQUEST post) path:)
                   domains:((REQUEST post) domains:)
               description:((REQUEST post) description:)
                   workers:(((REQUEST post) workers:) intValue)
