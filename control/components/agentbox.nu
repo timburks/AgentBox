@@ -80,7 +80,7 @@
                     ((worker-count) times:
                      (do (i)
                          (set container ((RadUUID new) stringValue))
-                         (set path (+ AGENTBOX-PATH "/workers/" container))
+                         (set path (+ CONTROL-PATH "/workers/" container))
                          (puts "Creating directory at path " path)
                          (set result
                               ((NSFileManager defaultManager)
@@ -118,7 +118,7 @@
                                    (upstart-config writeToFile:(+ "/etc/init/agentbox-worker-" port ".conf") atomically:NO)
                                    (system (+ "/sbin/initctl start agentbox-worker-" port)))
                              (else (set sandbox-sb (generate-sandbox-description container app-name port))
-                                   (sandbox-sb writeToFile:(+ AGENTBOX-PATH "/workers/" container "/sandbox.sb") atomically:NO)
+                                   (sandbox-sb writeToFile:(+ CONTROL-PATH "/workers/" container "/sandbox.sb") atomically:NO)
                                    (set launchd-plist (generate-launchd-plist container app-name port))
                                    (launchd-plist writeToFile:(+ "/Library/LaunchDaemons/net.agentbox.app." port ".plist") atomically:NO)
                                    (system (+ "launchctl load /Library/LaunchDaemons/net.agentbox.app." port ".plist"))))
@@ -158,7 +158,7 @@
                                    (puts "WORKER #{(worker description)}")
                                    (set container (worker container:))
                                    ;; create container directory
-                                   (set path (+ AGENTBOX-PATH "/workers/" container))
+                                   (set path (+ CONTROL-PATH "/workers/" container))
                                    (puts "Creating directory at path " path)
                                    (set result
                                         ((NSFileManager defaultManager)
@@ -192,7 +192,7 @@
                                    (set port (worker port:))
                                    
                                    (set sandbox-sb (generate-sandbox-description container (app name:) port))
-                                   (sandbox-sb writeToFile:(+ AGENTBOX-PATH "/workers/" container "/sandbox.sb") atomically:NO)
+                                   (sandbox-sb writeToFile:(+ CONTROL-PATH "/workers/" container "/sandbox.sb") atomically:NO)
                                    
                                    (set launchd-plist (generate-launchd-plist container (app name:) port))
                                    (launchd-plist writeToFile:(+ "/Library/LaunchDaemons/net.agentbox.app." port ".plist") atomically:NO)
@@ -222,7 +222,7 @@
                          (system (+ "launchctl unload " launchd-plist-name))
                          ((NSFileManager defaultManager) removeItemAtPath:launchd-plist-name error:nil)))
                (if (set container (worker container:))
-                   ((NSFileManager defaultManager) removeItemAtPath:(+ AGENTBOX-PATH "/workers/" container)
+                   ((NSFileManager defaultManager) removeItemAtPath:(+ CONTROL-PATH "/workers/" container)
                     error:nil))))
           ;; remove deployment from database
           (mongo updateObject:(dict $unset:(dict deployment:1))

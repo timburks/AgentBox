@@ -6,8 +6,8 @@
 (set PASSWORD_SALT SITE)
 
 (if (eq (uname) "Linux")
-    (then (set AGENTBOX-PATH "/home/agentbox"))
-    (else (set AGENTBOX-PATH "/AgentBox")))
+    (then (set CONTROL-PATH "/home/control"))
+    (else (set CONTROL-PATH "/AgentBox")))
 
 (class NSString
  (- (id) md5HashWithSalt:(id) salt is

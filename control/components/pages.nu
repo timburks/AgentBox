@@ -369,10 +369,10 @@
                (set text
                     (case file
                           ("upstart.conf" (NSString stringWithContentsOfFile:(+ "/etc/init/agentbox-worker-" (worker port:) ".conf")))
-                          ("sandbox.sb" (NSString stringWithContentsOfFile:(+ AGENTBOX-PATH "/workers/" container "/sandbox.sb")))
+                          ("sandbox.sb" (NSString stringWithContentsOfFile:(+ CONTROL-PATH "/workers/" container "/sandbox.sb")))
                           ("launchd.plist" (NSString stringWithContentsOfFile:(+ "/Library/LaunchDaemons/net.agentbox.app." (worker port:) ".plist")))
-                          ("stdout.log" (NSString stringWithContentsOfFile:(+ AGENTBOX-PATH "/workers/" container "/var/stdout.log")))
-                          ("stderr.log" (NSString stringWithContentsOfFile:(+ AGENTBOX-PATH "/workers/" container "/var/stderr.log")))
+                          ("stdout.log" (NSString stringWithContentsOfFile:(+ CONTROL-PATH "/workers/" container "/var/stdout.log")))
+                          ("stderr.log" (NSString stringWithContentsOfFile:(+ CONTROL-PATH "/workers/" container "/var/stderr.log")))
                           (t nil))))
          (else (set text nil)))
      (if text

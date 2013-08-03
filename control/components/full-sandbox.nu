@@ -32,7 +32,7 @@
               "^/private/etc/hosts"
               "^/System"
               "^/Library"
-              "^#{AGENTBOX-PATH}/workers/#{CONTAINER}/#{APPNAME}.app"))
+              "^#{CONTROL-PATH}/workers/#{CONTAINER}/#{APPNAME}.app"))
 
 (allow file-read-data file-read-metadata file-write-data
        (regex ; Allow files accessed by system dylibs and frameworks
@@ -41,7 +41,7 @@
               "^/dev/u?random$"
               "^/dev/autofs_nowait$"
               "^/dev/dtracehelper$"
-	      "^#{AGENTBOX-PATH}/workers/#{CONTAINER}/var"
+	      "^#{CONTROL-PATH}/workers/#{CONTAINER}/var"
               "/\.CFUserTextEncoding$"
               "^(/private)?/etc/localtime$"
               "^/usr/share/nls/"

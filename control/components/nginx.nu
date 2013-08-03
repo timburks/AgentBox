@@ -10,9 +10,9 @@ events {
 }
 
 http {
-    log_format agentbox '$msec|$time_local|$host|$request|$status|$bytes_sent|$request_time|$remote_addr|$http_referer|$http_user_agent|||';
-    access_log #{AGENTBOX-PATH}/var/nginx-access.log agentbox;
-    error_log #{AGENTBOX-PATH}/var/nginx-error.log debug;
+    log_format control '$msec|$time_local|$host|$request|$status|$bytes_sent|$request_time|$remote_addr|$http_referer|$http_user_agent|||';
+    access_log #{CONTROL-PATH}/var/nginx-access.log control;
+    error_log #{CONTROL-PATH}/var/nginx-error.log debug;
 
     large_client_header_buffers 4 32k;
 
@@ -48,10 +48,10 @@ http {
     server {
         listen          80;
         listen          443 ssl;
-        ssl_certificate     #{AGENTBOX-PATH}/control/etc/wildcard_agent_io.crt;
-        ssl_certificate_key #{AGENTBOX-PATH}/control/etc/wildcard_agent_io.key;
+        ssl_certificate     #{CONTROL-PATH}/control/etc/wildcard_agent_io.crt;
+        ssl_certificate_key #{CONTROL-PATH}/control/etc/wildcard_agent_io.key;
         server_name     ~^(.*)$;
-        root #{AGENTBOX-PATH}/public;
+        root #{CONTROL-PATH}/public;
         try_files $uri.html $uri $uri/ =404;
         location /control/ {
             proxy_set_header Host $host;
@@ -98,7 +98,7 @@ END)
 (function nginx-conf-path ()
           (if (eq (uname) "Linux")
               (then "/etc/nginx/nginx.conf")
-              (else "#{AGENTBOX-PATH}/nginx/nginx.conf")))
+              (else "#{CONTROL-PATH}/nginx/nginx.conf")))
 
 (function nginx-path ()
           (if (eq (uname) "Linux")
@@ -110,7 +110,7 @@ END)
           (set apps (mongo findArray:nil inCollection:(+ SITE ".apps")))
           ((nginx-config-with-services (get-property "root-domain") apps)
            writeToFile:(nginx-conf-path) atomically:YES)
-          (system "#{(nginx-path)} -s reload -c #{(nginx-conf-path)} -p #{AGENTBOX-PATH}/nginx/"))
+          (system "#{(nginx-path)} -s reload -c #{(nginx-conf-path)} -p #{CONTROL-PATH}/nginx/"))
 
 (function prime-nginx ()
           (set root-domain (get-property "root-domain"))
@@ -120,7 +120,7 @@ END)
           ((&html (&head (&title "AgentBox"))
                   (&body style:"background-color:#000; color:#FFF; font-family:Helvetica;"
                          (&p (&strong "AgentBox"))))
-           writeToFile:"#{AGENTBOX-PATH}/public/index.html" atomically:NO)
+           writeToFile:"#{CONTROL-PATH}/public/index.html" atomically:NO)
           ;; control redirect
           ((&a href:(+ "/control") "OK, Continue")
-           writeToFile:"#{AGENTBOX-PATH}/public/restart.html" atomically:NO))
+           writeToFile:"#{CONTROL-PATH}/public/restart.html" atomically:NO))
