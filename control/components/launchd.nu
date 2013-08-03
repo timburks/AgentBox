@@ -1,8 +1,8 @@
 
 (function generate-launchd-plist (CONTAINER NAME PORT)
-          ((dict Label:(+ "net.agentbox.app." PORT)
+          ((dict Label:(+ "net.control.app." PORT)
               OnDemand:(NSNumber numberWithBool:NO)
-              UserName:"agentbox"
+              UserName:"control"
       WorkingDirectory:(+ CONTROL-PATH "/workers/" CONTAINER "/" NAME ".app")
   EnvironmentVariables:(dict AGENTBOX-CONTAINER: CONTAINER
                                   AGENTBOX-PORT: PORT

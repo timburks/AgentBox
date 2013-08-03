@@ -2,7 +2,7 @@
 (load "RadCrypto")
 (load "RadMongoDB")
 
-(set SITE "agentbox")
+(set SITE "control")
 (set PASSWORD_SALT SITE)
 
 (if (eq (uname) "Linux")

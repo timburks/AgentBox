@@ -368,9 +368,9 @@
                (set file ((REQUEST bindings) file:))
                (set text
                     (case file
-                          ("upstart.conf" (NSString stringWithContentsOfFile:(+ "/etc/init/agentbox-worker-" (worker port:) ".conf")))
+                          ("upstart.conf" (NSString stringWithContentsOfFile:(+ "/etc/init/agentio-worker-" (worker port:) ".conf")))
                           ("sandbox.sb" (NSString stringWithContentsOfFile:(+ CONTROL-PATH "/workers/" container "/sandbox.sb")))
-                          ("launchd.plist" (NSString stringWithContentsOfFile:(+ "/Library/LaunchDaemons/net.agentbox.app." (worker port:) ".plist")))
+                          ("launchd.plist" (NSString stringWithContentsOfFile:(+ "/Library/LaunchDaemons/net.agentio.app." (worker port:) ".plist")))
                           ("stdout.log" (NSString stringWithContentsOfFile:(+ CONTROL-PATH "/workers/" container "/var/stdout.log")))
                           ("stderr.log" (NSString stringWithContentsOfFile:(+ CONTROL-PATH "/workers/" container "/var/stderr.log")))
                           (t nil))))
