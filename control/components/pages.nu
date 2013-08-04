@@ -220,6 +220,57 @@
                 (add-version app appfile-name appfile-data)))
       (RESPONSE redirectResponseToLocation:(+ "/control/apps/manage/" appid)))
 
+;; this macro wraps api handlers and generates formatted responses from the results.
+(macro auth (*body) ;; the body should return a (dict)
+       `(progn (RESPONSE setValue:"application/xml" forHTTPHeader:"Content-Type")
+               (set authorization ((REQUEST headers) Authorization:))
+               (set parts (authorization componentsSeparatedByString:" "))
+               (case (parts 0)
+                     ("Basic" (set credentials (NSString stringWithData:(NSData dataWithBase64EncodedString:(parts 1))
+                                                               encoding:NSUTF8StringEncoding))
+                              (set parts (credentials componentsSeparatedByString:":"))
+                              (set username (parts 0))
+                              (set password (parts 1))
+                              (mongo-connect)
+                              (set account (mongo findOne:(dict username:username
+                                                                password:(password md5HashWithSalt:PASSWORD_SALT))
+                                             inCollection:(+ SITE ".users"))))
+                     ("Bearer" (set secret (parts 1))
+                               (mongo-connect)
+                               (set account (mongo findOne:(dict secret:secret)
+                                              inCollection:(+ SITE ".users"))))
+                     (else (set account (get-user SITE))))
+               (if account
+                   (then ((progn ,@*body) XMLPropertyListRepresentation))
+                   (else (RESPONSE setStatus:401)
+                         ((dict message:"Unauthorized") XMLPropertyListRepresentation)))))
+
+(macro noauth (*body) ;; the body should return a (dict)
+       `(progn (RESPONSE setValue:"application/xml" forHTTPHeader:"Content-Type")
+               ((progn ,@*body) XMLPropertyListRepresentation)))
+
+;;=== Me ===
+
+(get "/control/api/account"
+     (auth (account removeObjectForKey:"password")
+           (account removeObjectForKey:"_id")
+           (dict message:"OK" account:account)))
+
+;;=== Administrators ===
+
+(post "/control/api/admin"
+      (control (set admin ((REQUEST body) propertyListValue))
+               (mongo-connect)
+               (if (mongo countWithCondition:(dict) inCollection:"users" inDatabase:SITE)
+                   (then (dict message:"Admin already exists"))
+                   (else (mongo insertObject:(dict username:(admin username:)
+                                                   password:((admin password:) md5HashWithSalt:PASSWORD_SALT)
+                                                     secret:((RadUUID new) stringValue)
+                                                   verified:YES
+                                                      admin:YES)
+                              intoCollection:(+ SITE ".users"))
+                         (dict message:"ok")))))
+
 (post "/control/api/appname:"
       (require-authorization)
       (set app (mongo findOne:(dict name:appname) inCollection:(+ SITE ".apps")))

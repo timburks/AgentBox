@@ -8,7 +8,9 @@
                         (do (key)
                             (&tr (&td key) (&td (&pre (dictionary objectForKey:key))))))))
 
-(get "/"
+(files "/*path:" "public")
+
+(get "/*path:"
      (set environment ((NSProcessInfo processInfo) environment))
      (&html (&head (&link href:"/foundation/css/normalize.css" rel:"stylesheet")
                    (&link href:"/foundation/css/foundation.min.css" rel:"stylesheet"))
@@ -17,12 +19,11 @@
                         (&div class:"large-12 columns"
                               (&h1 "Agent I/O Sample Standalone App")
                               (&p "This sample would run with its own domain.")
+                              (&p "Request path: " (REQUEST path))
                               (&h2 "Request headers")
                               (table-for-dictionary (REQUEST headers))
                               (&h2 "Environment")
                               (table-for-dictionary environment)
                               )))))
-
-(files "/*path:" "public")
 
 (RadHTTPServer run)
