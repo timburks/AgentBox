@@ -259,7 +259,7 @@
 ;;=== Administrators ===
 
 (post "/control/api/admin"
-      (control (set admin ((REQUEST body) propertyListValue))
+      (noauth (set admin ((REQUEST body) propertyListValue))
                (mongo-connect)
                (if (mongo countWithCondition:(dict) inCollection:"users" inDatabase:SITE)
                    (then (dict message:"Admin already exists"))

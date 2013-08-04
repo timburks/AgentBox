@@ -1,4 +1,4 @@
-(function NGINX-CONF (root-domain apps) <<-END
+(function NGINX-CONF (apps) <<-END
 #
 # AgentBox nginx configuration
 # this file was automatically generated
@@ -117,8 +117,8 @@ END)))))
                         "\n    }")))
            componentsJoinedByString:"\n"))
 
-(function nginx-config-with-services (root-domain apps)
-          (set config (NGINX-CONF root-domain apps))
+(function nginx-config-with-services (apps)
+          (set config (NGINX-CONF apps))
           config)
 
 (function nginx-conf-path ()
@@ -134,15 +134,14 @@ END)))))
 (function restart-nginx ()
           ((NSFileManager defaultManager) removeItemAtPath:(nginx-conf-path) error:nil)
           (set apps (mongo findArray:nil inCollection:(+ SITE ".apps")))
-          ((nginx-config-with-services (get-property "root-domain") apps)
+          ((nginx-config-with-services apps)
            writeToFile:(nginx-conf-path) atomically:YES)
           (system "#{(nginx-path)} -s reload -c #{(nginx-conf-path)} -p #{CONTROL-PATH}/nginx/"))
 
 (function prime-nginx ()
-          (set root-domain (get-property "root-domain"))
           ((NSFileManager defaultManager)
            removeItemAtPath:(nginx-conf-path) error:nil)
-          ((nginx-config-with-services root-domain (array))
+          ((nginx-config-with-services (array))
            writeToFile:(nginx-conf-path) atomically:YES)
           ;; control redirect
           ((&a href:(+ "/control") "OK, Continue")

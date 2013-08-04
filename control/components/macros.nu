@@ -8,6 +8,11 @@
       ((NSDateFormatter alloc) init))
  setDateFormat:"EEE, d MMM yyyy hh:mm:ss ZZZ")
 
+(macro mongo-connect ()
+       `(progn (unless (defined mongo)
+                       (set mongo (RadMongoDB new))
+                       (mongo connect))))
+
 ;; basic site structure
 
 (macro htmlpage (title *body)

@@ -49,5 +49,4 @@
             insertIfNecessary:YES
             updateMultipleEntries:NO))
 
-(set root-domain (get-property "root-domain"))
 
