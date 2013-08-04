@@ -126,7 +126,7 @@ sudo mkdir -p workers
 
 cd /home/control/control
 sudo nush tools/setup.nu
-sudo /usr/sbin/nginx 
+sudo /usr/sbin/nginx -s reload
 cd ..
 
 sudo cp upstart/agentio-control.conf /etc/init
