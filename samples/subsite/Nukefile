@@ -1,6 +1,6 @@
 (set appname "subsite")
 (set deus "http://agent.io")
-(set credentials "admin:password123")
+(set credentials "tim:admin123")
 
 (task "zip" is
       (SH "mkdir -p build/#{appname}.app")
