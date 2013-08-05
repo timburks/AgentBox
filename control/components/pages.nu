@@ -63,7 +63,7 @@
                                                              (then (set link (+ "/" (app path:))))
                                                              (else (set link (+ "http://" (((app domains:) componentsSeparatedByString:" ") 0)))))
                                                          (&div
-                                                              (&h2 (&a href:link (app name:)))
+                                                              (&h3 (&a href:link (app name:)))
                                                               (&p (app description:))
                                                               (&p (&a href:(+ "/control/apps/manage/" (app _id:)) "Manage it."))
                                                               ))))))
@@ -506,4 +506,26 @@
      (require-user)
      (RESPONSE setExit:1)
      (RESPONSE redirectResponseToLocation:"/restart.html"))
+
+(function table-for-dictionary (dictionary)
+          (set keys ((dictionary allKeys) sort))
+          (&table style:"width:100%"
+                  (keys map:
+                        (do (key)
+                            (&tr (&td key) (&td (&pre (dictionary objectForKey:key))))))))
+
+(get "/control/environment"
+     (set environment ((NSProcessInfo processInfo) environment))
+     (&html (&head (&link href:"/foundation/css/normalize.css" rel:"stylesheet")
+                   (&link href:"/foundation/css/foundation.min.css" rel:"stylesheet"))
+            (&body
+                  (&div class:"row"
+                        (&div class:"large-12 columns"
+                              (&h1 "Agent I/O App")
+                              (&p "Request path: " (REQUEST path))
+                              (&h2 "Request headers")
+                              (table-for-dictionary (REQUEST headers))
+                              (&h2 "Environment")
+                              (table-for-dictionary environment))))))
+
 

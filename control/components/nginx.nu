@@ -54,14 +54,14 @@ http {
         server_name     ~^(.*)$;
         root #{CONTROL-PATH}/public;
         try_files $uri.html $uri $uri/ =404;
+        error_page 404  /404.html;
+        error_page 403  /403.html;
+        error_page 502  /502.html;
         location /control/ {
             proxy_set_header Host $host;
             proxy_pass  http://127.0.0.1:2010;
         }
 #{(locations-for-apps apps)}
-        error_page 404  /404.html;
-        error_page 403  /403.html;
-        error_page 502  /502.html;
         client_max_body_size 10M;
     }
 #{(servers-for-apps apps)}
@@ -72,7 +72,7 @@ END)
           (set RESULTS "")
           (apps each:
                 (do (app)
-                    (if (and (app domains:) ((app domains:) length))
+                    (if (and (app domains:) ((app domains:) length) (((app deployment:) workers:) count))
                         (then (set server-name (app domains:))
                               (RESULTS << <<-END
 
@@ -81,6 +81,9 @@ END)
         server_name     #{server-name};
         root #{CONTROL-PATH}/public;
         try_files $uri.html $uri $uri/ =404;
+        error_page 404  /404.html;
+        error_page 403  /403.html;
+        error_page 502  /502.html;
         location / {
             proxy_set_header Host $host;
             proxy_pass http://#{(app _id:)};
@@ -94,7 +97,7 @@ END)))))
           (set RESULTS "")
           (apps each:
                 (do (app)
-                    (if (and (app path:) ((app path:) length))
+                    (if (and (app path:) ((app path:) length) (((app deployment:) workers:) count))
                         (then (RESULTS << (+ "        # " (app name:) "\n"
                                              "        location /" (app path:) "/ {\n"
                                              "            proxy_set_header Host $host;\n"
@@ -103,19 +106,20 @@ END)))))
                                              "        }"))))))
           RESULTS)
 
-
 (function upstream-servers-for-apps (apps)
-          ((apps map:
-                 (do (app)
-                     (+ "\n"
-                        "    # " (app name:) "\n"
-                        "    upstream " (app _id:) "{\n"
-                        ((((app deployment:) workers:) map:
-                          (do (worker)
-                              (+ "        server 127.0.0.1:" (worker port:) ";")))
-                         componentsJoinedByString:"\n")
-                        "\n    }")))
-           componentsJoinedByString:"\n"))
+          (set RESULTS "")
+          (apps each:
+                (do (app)
+                    (if (((app deployment:) workers:) count)
+                        (then (RESULTS << (+ "\n"
+                                             "    # " (app name:) "\n"
+                                             "    upstream " (app _id:) "{\n"
+                                             ((((app deployment:) workers:) map:
+                                               (do (worker)
+                                                   (+ "        server 127.0.0.1:" (worker port:) ";")))
+                                              componentsJoinedByString:"\n")
+                                             "\n    }"))))))
+          RESULTS)
 
 (function nginx-config-with-services (apps)
           (set config (NGINX-CONF apps))

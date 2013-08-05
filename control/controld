@@ -26,6 +26,4 @@
 
 (files "/control/*path:" "public")
 
-(get "/control/*whatever:" "CONTROL didn't have it. #{*whatever}")
-
 (RadHTTPServer run)
