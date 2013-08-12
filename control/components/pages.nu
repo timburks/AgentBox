@@ -260,16 +260,16 @@
 
 (post "/control/api/admin"
       (noauth (set admin ((REQUEST body) propertyListValue))
-               (mongo-connect)
-               (if (mongo countWithCondition:(dict) inCollection:"users" inDatabase:SITE)
-                   (then (dict message:"Admin already exists"))
-                   (else (mongo insertObject:(dict username:(admin username:)
-                                                   password:((admin password:) md5HashWithSalt:PASSWORD_SALT)
-                                                     secret:((RadUUID new) stringValue)
-                                                   verified:YES
-                                                      admin:YES)
-                              intoCollection:(+ SITE ".users"))
-                         (dict message:"ok")))))
+              (mongo-connect)
+              (if (mongo countWithCondition:(dict) inCollection:"users" inDatabase:SITE)
+                  (then (dict message:"Admin already exists"))
+                  (else (mongo insertObject:(dict username:(admin username:)
+                                                  password:((admin password:) md5HashWithSalt:PASSWORD_SALT)
+                                                    secret:((RadUUID new) stringValue)
+                                                  verified:YES
+                                                     admin:YES)
+                             intoCollection:(+ SITE ".users"))
+                        (dict message:"ok")))))
 
 (post "/control/api/appname:"
       (require-authorization)
@@ -383,6 +383,12 @@
                                             (&h2 "It's gone.")))))))
       (else (RESPONSE redirectResponseToLocation:(+ "/control/apps/manage/" appid))))
 
+(def upstart-filename (worker)
+     (+ "/etc/init/agentio-worker-" (worker port:) ".conf"))
+
+(def log-filename (worker)
+     (+ "/var/log/upstart/agentio-worker-" (worker port:) ".log"))
+
 (get "/control/apps/manage/appid:/container:"
      (require-user)
      (set appid ((REQUEST bindings) appid:))
@@ -397,14 +403,20 @@
                                (&div class:"row"
                                      (&div class:"large-12 columns"
                                            (&h1 "Worker for " (&a href:(+ "/control/apps/manage/" appid) (app name:)))
-                                           (&pre (worker description))
-                                           (&ul (if (eq (uname) "Linux")
-                                                    (then (+ (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/upstart.conf") "upstart.conf"))
-                                                             (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/logfile") "logfile"))))
-                                                    (else (+ (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/launchd.plist") "launchd.plist"))
-                                                             (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/sandbox.sb") "sandbox.sb")))))
-                                                (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/stdout.log") "stdout.log"))
-                                                (&li (&a href:(+ "/control/apps/manage/" appid "/" container "/stderr.log") "stderr.log"))))))))
+                                           (&table (&tr (&td "container") (&td (worker container:)))
+                                                   (&tr (&td "host") (&td (worker host:)))
+                                                   (&tr (&td "port") (&td (worker port:))))
+                                           (&table (if (eq (uname) "Linux")
+                                                       (then (+ (&tr (&td "upstart configuration")
+                                                                     (&td (&a href:(+ "/control/apps/manage/" appid "/" container "/upstart.conf") 
+(upstart-filename worker))))
+                                                                (&tr (&td "logfile")
+                                                                     (&td (&a href:(+ "/control/apps/manage/" appid "/" container "/logfile") 
+(log-filename worker))))))
+                                                       (else (+ (&tr (&td (&a href:(+ "/control/apps/manage/" appid "/" container "/launchd.plist") "launchd.plist")))
+                                                                (&tr (&td (&a href:(+ "/control/apps/manage/" appid "/" container "/sandbox.sb") "sandbox.sb")))
+                                                                (&tr (&td (&a href:(+ "/control/apps/manage/" appid "/" container "/stdout.log") "stdout.log")))
+                                                                (&tr (&td (&a href:(+ "/control/apps/manage/" appid "/" container "/stderr.log") "stderr.log"))))))))))))
          (else "not found")))
 
 (get "/control/apps/manage/appid:/container:/file:"
